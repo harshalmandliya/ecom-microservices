@@ -1,0 +1,30 @@
+# MinIO data
+.data/minio/
+
+# Loki data
+.data/loki-data/
+
+# Loki ruler data
+.data/loki-ruler/
+
+# Logs
+*.log
+
+# Environment files
+.env
+.env.*
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*~
