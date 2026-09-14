@@ -8,6 +8,7 @@ import com.ecommerce.order.dto.ProductResponse;
 import com.ecommerce.order.dto.UserResponse;
 import com.ecommerce.order.model.CartItem;
 import com.ecommerce.order.repository.CartItemRepository;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,8 @@ public class CartService {
     private final ProductServiceClient productServiceClient;
     private final UserServiceClient userServiceClient;
 
-    public boolean addToCart(Long userId, CartItemRequest request) {
+    @CircuitBreaker(name="orderService")
+    public boolean addToCart(String userId, CartItemRequest request) {
 
         ProductResponse productResponse = productServiceClient.getProductDetails(String.valueOf(request.getProductId()));
         if (productResponse == null)
@@ -55,7 +57,7 @@ public class CartService {
         return true;
     }
 
-    public boolean deleteItemFromCart(Long userId, Long productId) {
+    public boolean deleteItemFromCart(String userId, Long productId) {
        CartItem cartItem =  cartItemRepository.findByUserIdAndProductId(userId, productId);
         if (cartItem != null) {
             cartItemRepository.deleteByUserIdAndProductId(cartItem.getUserId(), cartItem.getProductId());
@@ -64,11 +66,11 @@ public class CartService {
         return false;
     }
 
-    public List<CartItem> getCart(Long userId) {
+    public List<CartItem> getCart(String userId) {
         return  cartItemRepository.findByUserId(userId);
     }
 
-    public void clearCart(Long userId) {
+    public void clearCart(String userId) {
         cartItemRepository.deleteByUserId(userId);
     }
 }

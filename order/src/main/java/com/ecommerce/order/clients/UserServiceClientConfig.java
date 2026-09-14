@@ -1,5 +1,6 @@
 package com.ecommerce.order.clients;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,12 +14,11 @@ import java.util.Optional;
 @Configuration
 public class UserServiceClientConfig {
 
-
-
     @Bean
-    public UserServiceClient userServiceClientInterface(RestClient.Builder restClientBuilder) {
+    public UserServiceClient userServiceClientInterface(
+            @LoadBalanced RestClient.Builder restClientBuilder) {
         RestClient restClient = restClientBuilder.baseUrl("http://user-service")
-                .defaultStatusHandler(HttpStatusCode::is4xxClientError,((request, response) -> Optional.empty()))
+                .defaultStatusHandler(HttpStatusCode::is4xxClientError, (request, response) -> Optional.empty())
                 .build();
         RestClientAdapter adapter = RestClientAdapter.create(restClient);
         HttpServiceProxyFactory factory = HttpServiceProxyFactory.builderFor(adapter).build();
