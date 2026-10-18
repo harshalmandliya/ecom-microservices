@@ -12,6 +12,7 @@ import com.ecommerce.order.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -25,11 +26,7 @@ import java.util.stream.Collectors;
 public class OrderService {
     private final CartService cartService;
     private final OrderRepository orderRepository;
-    private final RabbitTemplate rabbitTemplate;
-    @Value("${rabbitmq.exchange.name}")
-    private String exchangeName;
-    @Value("${rabbitmq.routing.key}")
-    private String routingKey;
+    private final StreamBridge streamBridge;
 
 
     public Optional<OrderResponse> createOrder(String userId) {
@@ -38,13 +35,7 @@ public class OrderService {
         if (cartItems.isEmpty()) {
             return Optional.empty();
         }
-        // Validate for user
 
-//        Optional<User> userOptional = userRepository.findById(Long.valueOf(userId));
-//        if (userOptional.isEmpty()) {
-//            return Optional.empty();
-//        }
-//        User user = userOptional.get();
 
         // Calculate total price
         BigDecimal totalPrice = cartItems.stream()
@@ -83,7 +74,7 @@ public class OrderService {
         );
 
 
-        rabbitTemplate.convertAndSend(exchangeName,routingKey,event);
+        streamBridge.send("createOrder-out-0",event);
 
         return Optional.of(mapToOrderResponse(savedOrder));
     }
